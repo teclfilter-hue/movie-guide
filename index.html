@@ -1,71 +1,55 @@
-```html
+```html id="lzqjlwm"
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Instruction Video</title>
 
 <style>
 
-html,body{
+body{
     margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
     background:#000;
     color:#fff;
-    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-    overflow:hidden;
-}
-
-body{
+    font-family:sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
+    min-height:100vh;
 }
 
 #container{
     width:100%;
     max-width:900px;
     padding:20px;
-    box-sizing:border-box;
     text-align:center;
+    box-sizing:border-box;
 }
 
 h1{
-    margin:0 0 20px;
-    font-size:28px;
-    font-weight:700;
+    margin-bottom:20px;
 }
 
 video{
     width:100%;
-    max-height:70vh;
+    border-radius:12px;
     background:#000;
-    border-radius:14px;
-}
-
-#loading{
-    margin-top:20px;
-    font-size:18px;
-    opacity:0.8;
 }
 
 .buttons{
     margin-top:20px;
     display:flex;
-    gap:12px;
     justify-content:center;
+    gap:12px;
     flex-wrap:wrap;
 }
 
 button{
+    padding:14px 24px;
     border:none;
-    border-radius:12px;
-    padding:14px 22px;
+    border-radius:10px;
     font-size:18px;
     cursor:pointer;
     background:#fff;
@@ -73,15 +57,9 @@ button{
     font-weight:bold;
 }
 
-button:active{
-    transform:scale(0.98);
-}
-
-#playButton{
-    margin-top:18px;
-    display:none;
-    width:100%;
-    max-width:320px;
+#status{
+    margin-top:15px;
+    opacity:0.8;
 }
 
 </style>
@@ -94,30 +72,26 @@ button:active{
     <h1 id="title">Loading...</h1>
 
     <video
-        id="videoPlayer"
+        id="video"
         controls
         playsinline
         webkit-playsinline
-        preload="auto"
+        preload="metadata"
     >
-        <source id="videoSource" src="" type="video/mp4">
+        <source id="source" src="">
     </video>
 
-    <div id="loading">
+    <div id="status">
         Detecting language...
     </div>
 
-    <button id="playButton">
-        ▶ TAP TO PLAY
-    </button>
-
     <div class="buttons">
 
-        <button onclick="setLanguage('ja')">
+        <button onclick="setJapanese()">
             🇯🇵 日本語
         </button>
 
-        <button onclick="setLanguage('en')">
+        <button onclick="setEnglish()">
             🇺🇸 English
         </button>
 
@@ -127,119 +101,62 @@ button:active{
 
 <script>
 
-const videoPlayer = document.getElementById('videoPlayer');
-const videoSource = document.getElementById('videoSource');
+const video = document.getElementById('video');
+const source = document.getElementById('source');
 const title = document.getElementById('title');
-const loading = document.getElementById('loading');
-const playButton = document.getElementById('playButton');
+const statusText = document.getElementById('status');
 
-let currentLanguage = 'en';
+function setJapanese(){
 
-/*
-========================================
-動画ファイル名
-========================================
+    title.innerText = '操作説明動画';
 
-同じフォルダへ配置
+    source.src = './japanese.mp4';
 
-index.html
-japanese.mp4
-english.mp4
+    video.load();
 
-========================================
-*/
+    statusText.innerText = '日本語動画';
 
-function setLanguage(lang){
-
-    currentLanguage = lang;
-
-    if(lang === 'ja'){
-
-        title.innerText = '操作説明動画';
-        loading.innerText = '動画を読み込み中...';
-
-        videoSource.src = 'japanese.mp4';
-
-    }else{
-
-        title.innerText = 'Instruction Video';
-        loading.innerText = 'Loading video...';
-
-        videoSource.src = 'english.mp4';
-
-    }
-
-    videoPlayer.load();
-
-    attemptAutoplay();
 }
 
-function attemptAutoplay(){
+function setEnglish(){
 
-    const promise = videoPlayer.play();
+    title.innerText = 'Instruction Video';
 
-    if(promise !== undefined){
+    source.src = './english.mp4';
 
-        promise.then(() => {
+    video.load();
 
-            loading.style.display = 'none';
-            playButton.style.display = 'none';
+    statusText.innerText = 'English Video';
 
-        }).catch(() => {
-
-            // iPhone対策
-            loading.style.display = 'none';
-            playButton.style.display = 'inline-block';
-
-        });
-
-    }
 }
 
 function detectLanguage(){
 
-    const lang =
+    const lang = (
         navigator.language ||
         navigator.userLanguage ||
-        navigator.browserLanguage ||
-        'en';
+        'en'
+    ).toLowerCase();
 
-    console.log('Detected Language:', lang);
+    console.log(lang);
 
-    const lower = lang.toLowerCase();
+    if(lang.startsWith('ja')){
 
-    if(lower.startsWith('ja')){
-
-        setLanguage('ja');
+        setJapanese();
 
     }else{
 
-        setLanguage('en');
+        setEnglish();
 
     }
+
 }
 
-playButton.addEventListener('click', () => {
+video.addEventListener('error', function(){
 
-    videoPlayer.play();
-
-    playButton.style.display = 'none';
-
-});
-
-videoPlayer.addEventListener('loadeddata', () => {
-
-    console.log('Video loaded');
-
-});
-
-videoPlayer.addEventListener('error', (e) => {
-
-    console.log('Video error:', e);
-
-    loading.innerHTML = `
-        Video could not be loaded.<br>
-        Please check file names.
+    statusText.innerHTML = `
+        動画を読み込めません。<br>
+        ファイル名を確認してください。
     `;
 
 });
